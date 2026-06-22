@@ -155,11 +155,14 @@ export function updateConversation(id: string, patch: Partial<Conversation>) {
   });
 }
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 export function useStore<T>(selector: (s: AppState) => T): T {
+  const [, setReady] = useState(false);
+  useEffect(() => { ensureHydrated(); setReady(true); }, []);
   return useSyncExternalStore(
     (cb) => store.subscribe(cb),
-    () => selector(store.getState()),
+    () => selector(state),
     () => selector(initial),
   );
 }
+

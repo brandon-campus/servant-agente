@@ -35,39 +35,63 @@ export interface AppState {
 const KEY = "servant-state-v1";
 
 const defaultContent: Record<string, string> = {
-  reparar: "En Servant somos expertos en reparación Apple. Presupuestamos en el acto. Trabajamos con pantallas originales y baterías certificadas. Garantía de 90 días en todas las reparaciones.",
-  comprar: "Vendemos equipos Apple nuevos y reacondicionados con garantía. Tomamos tu celu usado como forma de pago. Financiación disponible.",
-  cursos_presenciales: "Cursos presenciales en Av. Corrientes 3621, Almagro, Buenos Aires. Niveles inicial, intermedio y avanzado. Puestos completamente equipados con herramientas profesionales.",
-  cursos_online: "Cursos online en 4K. Acceso de por vida al material. Comunidad privada de alumnos. Certificado al finalizar.",
-  maquinas: "Distribuidores oficiales de las mejores marcas para técnicos. Máquinas de soldar, microscopios, fuentes reguladas, estaciones de aire caliente y más.",
-  repuestos: "Distribuidores oficiales de Mobilesentrix en Argentina. Repuestos originales y compatibles para todas las marcas. Envíos a todo el país.",
-  alquilar: "Auditorio para 100 personas, estudio de podcast y estudio fotográfico en Av. Corrientes 3621. Ideal para eventos, grabaciones y presentaciones.",
+  reparar: "En Servant somos expertos en reparación Apple 🍎.\n\nTrabajamos con repuestos originales y alternativos AAA. Presupuestamos en el acto.\n\n💳 3 y 6 cuotas sin interés.\n🛡️ Garantía escrita de 90 días.\n\nDecime, ¿qué problema tiene tu equipo o qué modelo es?",
+  comprar: "¡Excelente decisión! Vendemos equipos Apple nuevos (en caja sellada) y reacondicionados (A+) con garantía.\n\n🔄 Tomamos tu celular usado como parte de pago.\n🚚 Envíos gratis a todo el país.\n\n¿Buscás algún modelo de iPhone en particular?",
+  cursos_presenciales: "Nuestros cursos presenciales se dictan en Av. Corrientes 3621, Almagro, CABA.\n\n🛠️ Puestos equipados con herramientas nivel profesional.\n👨‍🏫 Profesores técnicos activos en el rubro.\n\nContamos con niveles Inicial, Intermedio y Microelectrónica. ¿Qué nivel buscabas?",
+  cursos_online: "La modalidad online incluye acceso de por vida a nuestra plataforma, clases grabadas en 4K y soporte directo de los profesores en foros privados.\n\nPodés empezar hoy mismo. ¿Te interesa el temario?",
+  maquinas: "Somos distribuidores oficiales de las mejores marcas para técnicos (Sugon, Quick, Mechanic, Yihua).\n\nVendemos estaciones de soldado, microscopios trinoculares, fuentes y mucho más. ¿Qué necesitás para equipar tu taller?",
+  repuestos: "Somos representantes oficiales de Mobilesentrix en Argentina. 📦\n\nVendemos repuestos originales (AmpSentrix) y alternativos de alta calidad para iPhone y otras marcas, directo a gremio.\n\n¿Querés que te pasemos la lista de precios mayorista?",
+  alquilar: "Contamos con instalaciones de primer nivel en Almagro:\n\n🎙️ Estudio de Podcast profesional.\n📸 Estudio fotográfico / Set de streaming.\n👥 Auditorio para 100 personas.\n\n¿Para qué tipo de evento o proyecto buscás espacio?",
 };
 
 const initial: AppState = {
   conversations: {
     "u1": {
-      id: "u1", area: "Cursos presenciales", status: "in_human",
-      createdAt: Date.now() - 1000 * 60 * 8, updatedAt: Date.now() - 1000 * 60 * 8,
+      id: "u1", area: "Reparar mi celu", status: "pending_human",
+      createdAt: Date.now() - 1000 * 60 * 15, updatedAt: Date.now() - 1000 * 60 * 10,
       messages: [
-        { id: "m1", sender: "bot", text: "¡Hola! 👋 Soy el asistente de Servant Argentina.\n¿En qué te puedo ayudar hoy?", ts: Date.now() - 1000 * 60 * 10 },
-        { id: "m2", sender: "user", text: "Cursos presenciales", ts: Date.now() - 1000 * 60 * 9 },
-        { id: "m3", sender: "user", text: "Quiero anotarme al próximo curso", ts: Date.now() - 1000 * 60 * 8 },
+        { id: "m1", sender: "bot", text: "¡Hola! 👋 Soy el asistente de Servant Argentina.\n¿En qué te puedo ayudar hoy?", ts: Date.now() - 1000 * 60 * 15 },
+        { id: "m2", sender: "user", text: "🔧 Reparar mi celu", ts: Date.now() - 1000 * 60 * 14 },
+        { id: "m3", sender: "bot", text: defaultContent.reparar, ts: Date.now() - 1000 * 60 * 14 + 1000 },
+        { id: "m4", sender: "user", text: "Tengo un iPhone 13, se me rompió el módulo. Cuánto sale?", ts: Date.now() - 1000 * 60 * 12 },
+        { id: "m5", sender: "bot", text: "¡Genial! Para coordinar esto con vos necesito que te contacte una persona de nuestro equipo 🙌\n\nYa le avisé a Leila. En breve te va a atender por acá mismo.\n⏳ Esperá unos minutos...", ts: Date.now() - 1000 * 60 * 11 },
       ],
     },
     "u2": {
-      id: "u2", area: "Repuestos por mayor", status: "resolved",
-      createdAt: Date.now() - 1000 * 60 * 60, updatedAt: Date.now() - 1000 * 60 * 60,
+      id: "u2", area: "Cursos presenciales", status: "pending_human",
+      createdAt: Date.now() - 1000 * 60 * 30, updatedAt: Date.now() - 1000 * 60 * 25,
       messages: [
-        { id: "m1", sender: "user", text: "Repuestos por mayor", ts: Date.now() - 1000 * 60 * 65 },
-        { id: "m2", sender: "leila", text: "¡Hola! Te paso el catálogo por mail.", ts: Date.now() - 1000 * 60 * 60 },
+        { id: "m1", sender: "user", text: "🎓 Cursos presenciales", ts: Date.now() - 1000 * 60 * 30 },
+        { id: "m2", sender: "bot", text: defaultContent.cursos_presenciales, ts: Date.now() - 1000 * 60 * 29 },
+        { id: "m3", sender: "user", text: "Nivel inicial por favor. Quiero anotarme a la proxima camada", ts: Date.now() - 1000 * 60 * 26 },
+        { id: "m4", sender: "bot", text: "¡Genial! Para coordinar esto con vos necesito que te contacte una persona de nuestro equipo 🙌\n\nYa le avisé a Leila. En breve te va a atender por acá mismo.\n⏳ Esperá unos minutos...", ts: Date.now() - 1000 * 60 * 25 },
+      ],
+    },
+    "u3": {
+      id: "u3", area: "Repuestos por mayor", status: "resolved",
+      createdAt: Date.now() - 1000 * 60 * 120, updatedAt: Date.now() - 1000 * 60 * 90,
+      messages: [
+        { id: "m1", sender: "user", text: "📦 Repuestos por mayor", ts: Date.now() - 1000 * 60 * 120 },
+        { id: "m2", sender: "bot", text: defaultContent.repuestos, ts: Date.now() - 1000 * 60 * 119 },
+        { id: "m3", sender: "user", text: "Si, soy de Cordoba me pasas el PDF?", ts: Date.now() - 1000 * 60 * 110 },
+        { id: "m4", sender: "leila", text: "¡Hola! Claro, acá tenés el link para descargar el catálogo mayorista de este mes: servant-repuestos.pdf", ts: Date.now() - 1000 * 60 * 105 },
+        { id: "m5", sender: "user", text: "Gracias Leila, te escribo por wsp despues.", ts: Date.now() - 1000 * 60 * 90 },
+      ],
+    },
+    "u4": {
+      id: "u4", area: "Máquinas y herramientas", status: "active",
+      createdAt: Date.now() - 1000 * 60 * 2, updatedAt: Date.now() - 1000 * 60 * 1,
+      messages: [
+        { id: "m1", sender: "bot", text: "¡Hola! 👋 Soy el asistente de Servant Argentina.\n¿En qué te puedo ayudar hoy?", ts: Date.now() - 1000 * 60 * 2 },
+        { id: "m2", sender: "user", text: "🔩 Máquinas y herramientas", ts: Date.now() - 1000 * 60 * 1 },
+        { id: "m3", sender: "bot", text: defaultContent.maquinas, ts: Date.now() - 1000 * 60 * 1 + 1000 },
       ],
     },
   },
   leilaOnline: true,
   config: {
-    agentName: "Asistente Servant",
-    welcome: "¡Hola! 👋 Soy el asistente de Servant Argentina.\n¿En qué te puedo ayudar hoy?",
+    agentName: "Servant IA",
+    welcome: "¡Hola! 👋 Soy el asistente de Servant Argentina.\nTenemos varias áreas para ayudarte. ¿Qué estabas buscando hoy?",
     agentActive: true,
     showLeilaIndicator: true,
   },

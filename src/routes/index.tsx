@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import logoAsset from "@/assets/servant-logo.png.asset.json";
+import { Wrench, Smartphone, GraduationCap, Laptop, Hammer, Package, Mic, SendHorizontal, Bot, Menu, Plus } from "lucide-react";
 import {
   addMessage,
   createConversation,
   updateConversation,
   useStore,
+  store,
   type ChatMessage,
 } from "@/lib/servant-store";
 
@@ -20,24 +21,14 @@ export const Route = createFileRoute("/")({
 });
 
 const AREAS = [
-  { key: "reparar", label: "🔧 Reparar mi celu" },
-  { key: "comprar", label: "📱 Comprar un celu" },
-  { key: "cursos_presenciales", label: "🎓 Cursos presenciales" },
-  { key: "cursos_online", label: "💻 Cursos online" },
-  { key: "maquinas", label: "🔩 Máquinas y herramientas" },
-  { key: "repuestos", label: "📦 Repuestos por mayor" },
-  { key: "alquilar", label: "🎙️ Alquilar espacios" },
+  { key: "reparar", label: "Reparar mi celu", icon: Wrench },
+  { key: "comprar", label: "Comprar un celu", icon: Smartphone },
+  { key: "cursos_presenciales", label: "Cursos presenciales", icon: GraduationCap },
+  { key: "cursos_online", label: "Cursos online", icon: Laptop },
+  { key: "maquinas", label: "Máquinas y herramientas", icon: Hammer },
+  { key: "repuestos", label: "Repuestos por mayor", icon: Package },
+  { key: "alquilar", label: "Alquilar espacios", icon: Mic },
 ];
-
-const AREA_RESPONSES: Record<string, string> = {
-  reparar: "¡Perfecto! En Servant somos expertos en reparación Apple 🍎\nPresupuestamos tu reparación en el acto.\n\n¿Qué problema tiene tu dispositivo? Por ejemplo:\npantalla rota, batería, cámara, botones, o no enciende.",
-  comprar: "¡Genial! Tenemos equipos Apple disponibles 📱\nAdemás, tomamos tu celu usado como forma de pago.\n\n¿Tenés algún modelo en mente o querés que te ayude a elegir según tu presupuesto?",
-  cursos_presenciales: "¡Excelente decisión! 🎓 Nuestros cursos presenciales son en Av. Corrientes 3621, Almagro, Buenos Aires.\n\nTenemos cursos para todos los niveles con puestos completamente equipados.\n\n¿Sos principiante o ya tenés experiencia en reparación de celulares?",
-  cursos_online: "💻 Nuestros cursos online son en definición 4K para que no te pierdas ningún detalle.\n\nPodés aprender a tu ritmo desde cualquier lugar del país.\n\n¿Querés información sobre algún curso en particular o preferís que te cuente las opciones disponibles?",
-  maquinas: "🔩 Somos distribuidores de las mejores herramientas para técnicos.\nTenemos todo lo que necesitás para equipar tu taller.\n\n¿Buscás alguna herramienta en particular o querés ver el catálogo completo?",
-  repuestos: "📦 Somos distribuidores oficiales de Mobilesentrix en todo el país.\n\n¿Ya sos distribuidor o querés serlo? ¿O buscás comprar repuestos para tu taller?",
-  alquilar: "🎙️ Nuestro espacio está en Av. Corrientes 3621, Almagro — con auditorio para 100 personas, estudio de podcast y estudio fotográfico.\n\n¿Para qué tipo de evento o grabación necesitás el espacio?",
-};
 
 const HANDOFF_KEYWORDS = [
   "quiero", "me interesa", "como compro", "cómo compro", "cuanto sale", "cuánto sale",
@@ -58,58 +49,44 @@ function genId() {
 function AgentView() {
   const [convoId, setConvoId] = useState<string | null>(null);
   const [input, setInput] = useState("");
-  const [showAreas, setShowAreas] = useState(false);
   const [botTyping, setBotTyping] = useState(false);
-  const [welcomeDone, setWelcomeDone] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const conversation = useStore((s) => (convoId ? s.conversations[convoId] : null));
   const leilaOnline = useStore((s) => s.leilaOnline);
   const showLeila = useStore((s) => s.config.showLeilaIndicator);
   const welcome = useStore((s) => s.config.welcome);
-  const agentName = useStore((s) => s.config.agentName);
 
-  // Init conversation once on mount
   useEffect(() => {
     const id = genId();
     createConversation(id);
     setConvoId(id);
   }, []);
 
-  // Welcome flow
-  useEffect(() => {
-    if (!convoId || welcomeDone || !conversation) return;
-    if (conversation.messages.length > 0) {
-      setWelcomeDone(true);
-      // If past welcome already triggered area selection, hide area buttons
-      if (conversation.area) setShowAreas(false);
-      else setShowAreas(true);
-      return;
-    }
-    setWelcomeDone(true);
-    setBotTyping(true);
-    const t1 = setTimeout(() => {
-      setBotTyping(false);
-      addMessage(convoId, { sender: "bot", text: welcome });
-      setTimeout(() => setShowAreas(true), 400);
-    }, 800);
-    return () => clearTimeout(t1);
-  }, [convoId, welcomeDone, conversation, welcome]);
-
-  // Auto scroll
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight, behavior: "smooth" });
-  }, [conversation?.messages.length, botTyping, showAreas]);
+  }, [conversation?.messages.length, botTyping]);
+
+  function resetChat() {
+    const id = `u${Math.floor(Math.random() * 900 + 100)}`;
+    sessionStorage.setItem("servant-convo-id", id);
+    createConversation(id);
+    setConvoId(id);
+    setSidebarOpen(false);
+  }
 
   function pickArea(area: typeof AREAS[number]) {
     if (!convoId) return;
-    setShowAreas(false);
+    setSidebarOpen(false);
     addMessage(convoId, { sender: "user", text: area.label });
     updateConversation(convoId, { area: area.label });
     setBotTyping(true);
     setTimeout(() => {
       setBotTyping(false);
-      addMessage(convoId, { sender: "bot", text: AREA_RESPONSES[area.key] });
+      const content = store.getState().content;
+      addMessage(convoId, { sender: "bot", text: content[area.key] || "¡Entendido!" });
     }, 1000);
   }
 
@@ -117,12 +94,12 @@ function AgentView() {
     if (!convoId || !input.trim() || botTyping) return;
     const text = input.trim();
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+
     addMessage(convoId, { sender: "user", text });
 
     const c = conversation;
     if (!c) return;
-
-    // If already in human stage, don't auto-respond
     if (c.status === "pending_human" || c.status === "in_human") return;
 
     const lower = text.toLowerCase();
@@ -150,71 +127,198 @@ function AgentView() {
     }
   }
 
-  const inputDisabled = botTyping;
-  const showLeilaStatus = showLeila && conversation && (conversation.status === "pending_human" || conversation.status === "in_human");
+  function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = Math.min(e.target.scrollHeight, 150) + "px";
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  }
+
+  const isChatStarted = !!(conversation && conversation.messages.length > 0);
+  const showLeilaStatus = showLeila && conversation &&
+    (conversation.status === "pending_human" || conversation.status === "in_human");
 
   return (
-    <div className="chat-wrap">
-      <div className="chat-app">
-        <header className="chat-header">
-          <img src={logoAsset.url} alt="Servant" />
-          <div>
-            <h1>{agentName.toUpperCase()}</h1>
-            <p>Expertos en Apple · Argentina</p>
-          </div>
-        </header>
+    <div className="agent-layout">
+      {/* Backdrop */}
+      <div
+        className={`sidebar-backdrop${sidebarOpen ? " visible" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+      />
 
-        <div className="chat-body" ref={bodyRef}>
-          {conversation?.messages.map((m) => <Bubble key={m.id} m={m} />)}
-          {botTyping && (
-            <div className="typing"><span /><span /><span /></div>
-          )}
-          {showAreas && !botTyping && (
-            <div className="area-buttons">
-              {AREAS.map((a) => (
-                <button key={a.key} className="area-btn" onClick={() => pickArea(a)}>
-                  {a.label}
-                </button>
-              ))}
+      {/* Sidebar */}
+      <aside className={`agent-sidebar${sidebarOpen ? " open" : ""}`}>
+        <div className="agent-sidebar-header">
+          <button className="new-chat-btn" onClick={resetChat}>
+            <Plus size={16} />
+            Nuevo chat
+          </button>
+        </div>
+        <div className="agent-sidebar-nav">
+          <div className="agent-sidebar-nav-title">Áreas de servicio</div>
+          {AREAS.map((a) => (
+            <button key={a.key} className="agent-nav-item" onClick={() => pickArea(a)}>
+              <a.icon size={15} />
+              {a.label}
+            </button>
+          ))}
+        </div>
+        <div className="agent-sidebar-footer">
+          <div className="avatar-sm" style={{ width: 32, height: 32, fontSize: 13 }}>U</div>
+          Cliente Visitante
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="agent-main">
+        {/* Mobile header */}
+        <div className="agent-mobile-header">
+          <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>
+            <Menu size={22} />
+          </button>
+          <Bot size={18} style={{ color: "var(--servant-yellow)" }} />
+          <span>SERVANT</span>
+        </div>
+
+        {/* Scroll area */}
+        <div className="agent-scroll-area" ref={bodyRef}>
+          {!isChatStarted ? (
+            /* START SCREEN */
+            <div className="agent-start-screen">
+              <div className="agent-start-bot-icon">
+                <Bot size={52} />
+              </div>
+              <h1>{welcome || "¡Hola! ¿En qué te puedo ayudar hoy?"}</h1>
+
+              <div className="agent-input-box">
+                <form
+                  className="agent-input-form"
+                  onSubmit={(e) => { e.preventDefault(); send(); }}
+                >
+                  <textarea
+                    ref={textareaRef}
+                    className="agent-textarea"
+                    placeholder="Escribí tu consulta..."
+                    value={input}
+                    onChange={handleInput}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    disabled={botTyping}
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="agent-send-btn"
+                    disabled={botTyping || !input.trim()}
+                    aria-label="Enviar"
+                  >
+                    <SendHorizontal size={20} />
+                  </button>
+                </form>
+
+                <div className="agent-pills">
+                  {AREAS.map((a) => (
+                    <button key={a.key} className="agent-pill" onClick={() => pickArea(a)}>
+                      <a.icon size={14} />
+                      {a.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          )}
-          {showLeilaStatus && (
-            <div className="leila-status">
-              <span className={`leila-dot ${leilaOnline ? "" : "off"}`} />
-              Leila {leilaOnline ? "está disponible" : "no está disponible ahora"}
+          ) : (
+            /* CHAT MESSAGES */
+            <div className="agent-messages">
+              {conversation.messages.map((m) => (
+                <ClaudeBubble key={m.id} m={m} />
+              ))}
+
+              {botTyping && (
+                <div className="agent-typing">
+                  <div className="msg-bot-avatar">
+                    <Bot size={15} />
+                  </div>
+                  <div className="agent-typing-dots">
+                    <span /><span /><span />
+                  </div>
+                </div>
+              )}
+
+              {showLeilaStatus && (
+                <div className="agent-leila-status">
+                  <span className={`agent-leila-dot${leilaOnline ? "" : " off"}`} />
+                  Leila {leilaOnline ? "está disponible" : "no está disponible ahora"}
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        <form
-          className="chat-footer"
-          onSubmit={(e) => { e.preventDefault(); send(); }}
-        >
-          <input
-            className="chat-input"
-            placeholder="Escribí tu consulta..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={inputDisabled}
-            autoFocus
-          />
-          <button type="submit" className="send-btn" disabled={inputDisabled || !input.trim()} aria-label="Enviar">
-            ➤
-          </button>
-        </form>
-      </div>
+        {/* Chat footer (only in chat mode) */}
+        {isChatStarted && (
+          <div className="agent-chat-footer">
+            <div className="agent-input-box">
+              <form
+                className="agent-input-form"
+                onSubmit={(e) => { e.preventDefault(); send(); }}
+              >
+                <textarea
+                  ref={textareaRef}
+                  className="agent-textarea"
+                  placeholder="Escribí tu consulta..."
+                  value={input}
+                  onChange={handleInput}
+                  onKeyDown={handleKeyDown}
+                  rows={1}
+                  disabled={botTyping}
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className="agent-send-btn"
+                  disabled={botTyping || !input.trim()}
+                  aria-label="Enviar"
+                >
+                  <SendHorizontal size={20} />
+                </button>
+              </form>
+              <p className="agent-footer-hint">
+                Servant IA puede cometer errores. Considerá verificar la información importante.
+              </p>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
 
-function Bubble({ m }: { m: ChatMessage }) {
+function ClaudeBubble({ m }: { m: ChatMessage }) {
   if (m.sender === "user") {
-    return <div className="bubble user">{m.text}</div>;
+    return (
+      <div className="msg-user">
+        <div className="msg-user-bubble">{m.text}</div>
+      </div>
+    );
   }
+
   return (
-    <div className="bubble bot">
-      {m.sender === "leila" && <div className="bubble-author">Leila · Servant</div>}
-      {m.text}
+    <div className="msg-bot">
+      <div className="msg-bot-avatar">
+        {m.sender === "leila" ? "L" : <Bot size={15} />}
+      </div>
+      <div className="msg-bot-content">
+        {m.sender === "leila" && (
+          <div className="msg-bot-author">Leila · Servant</div>
+        )}
+        <div className="msg-bot-text">{m.text}</div>
+      </div>
     </div>
   );
 }

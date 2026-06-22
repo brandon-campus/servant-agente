@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import logoAsset from "@/assets/servant-logo.png.asset.json";
+import { Bot } from "lucide-react";
 import {
   addMessage,
   store,
@@ -38,7 +38,7 @@ function Login({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="admin-login">
       <form className="login-card" onSubmit={submit}>
-        <img src={logoAsset.url} alt="Servant" />
+        <div className="avatar-lg" style={{ alignSelf: "center", marginBottom: 8, width: 48, height: 48 }}><Bot size={28} /></div>
         <h2>Servant Admin</h2>
         <div>
           <label>Email</label>
@@ -79,7 +79,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     <div className="admin-shell">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img src={logoAsset.url} alt="Servant" />
+          <div className="avatar-sm" style={{ marginRight: 4 }}><Bot size={12} /></div>
           <span>SERVANT</span>
         </div>
         <NavItem icon="📊" label="Métricas" active={section === "metrics"} onClick={() => setSection("metrics")} />
@@ -125,26 +125,28 @@ function Metrics() {
   const list = Object.values(conversations);
   const pending = list.filter((c) => c.status === "pending_human").length;
   const derived = list.filter((c) => c.status === "pending_human" || c.status === "in_human" || c.status === "resolved").length;
-  const total = 24; // hardcoded "consultas hoy"
+  const total = list.length;
 
-  const breakdown = [
-    { label: "Reparar mi celu", value: 9 },
-    { label: "Cursos presenciales", value: 5 },
-    { label: "Repuestos por mayor", value: 4 },
-    { label: "Comprar un celu", value: 3 },
-    { label: "Cursos online", value: 2 },
-    { label: "Máquinas y herramientas", value: 1 },
-    { label: "Alquilar espacios", value: 0 },
-  ];
+  const counts: Record<string, number> = {};
+  list.forEach(c => {
+    const area = c.area || "Sin área";
+    counts[area] = (counts[area] || 0) + 1;
+  });
+
+  const breakdown = Object.entries(counts)
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value);
+
+  const topArea = breakdown.length > 0 && breakdown[0].value > 0 ? breakdown[0].label : "N/A";
   const max = Math.max(...breakdown.map((b) => b.value), 1);
 
   return (
     <>
       <div className="metric-grid">
-        <Card label="Consultas hoy" value={total} sub="▲ +18% vs ayer" />
-        <Card label="Derivaciones" value={Math.max(derived, 6)} sub="Esta semana" />
-        <Card label="Área top" value="Reparación" sub="36% del total" />
-        <Card label="En espera" value={pending} sub={pending > 0 ? "🔴 urgente" : "Sin pendientes"} urgent={pending > 0} />
+        <Card label="Consultas totales" value={total} sub="En el sistema" />
+        <Card label="Derivaciones" value={derived} sub="Atención humana" />
+        <Card label="Área top" value={topArea} sub="Más consultada" />
+        <Card label="En espera" value={pending} sub={pending > 0 ? "🔴 requieren atención" : "Sin pendientes"} urgent={pending > 0} />
       </div>
 
       <div className="panel">
@@ -223,7 +225,10 @@ function Chats() {
             <button key={c.id} className={`convo-item ${selected === c.id ? "active" : ""}`} onClick={() => setSelected(c.id)}>
               <div className="row1">
                 <span className={`status-dot ${cls}`} />
-                <span>Usuario #{c.id.replace(/^u/, "")}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div className="avatar-sm">U</div>
+                  Usuario #{c.id.replace(/^u/, "")}
+                </span>
                 <span className="time">{timeAgo(c.updatedAt)}</span>
               </div>
               <div className="row2">
@@ -240,9 +245,12 @@ function Chats() {
         ) : (
           <>
             <div className="chat-pane-header">
-              <div>
-                <div style={{ fontWeight: 800 }}>Usuario #{convo.id.replace(/^u/, "")}</div>
-                <div style={{ fontSize: 12, color: "var(--servant-text-dim)" }}>{convo.area ?? "Sin área"} · {convo.status}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div className="avatar-lg">U</div>
+                <div>
+                  <div style={{ fontWeight: 800 }}>Usuario #{convo.id.replace(/^u/, "")}</div>
+                  <div style={{ fontSize: 12, color: "var(--servant-text-dim)" }}>{convo.area ?? "Sin área"} · <span style={{ color: convo.status === "pending_human" ? "var(--servant-red)" : "inherit" }}>{convo.status}</span></div>
+                </div>
               </div>
               {convo.status !== "resolved" && (
                 <button className="btn-green" onClick={resolve}>Marcar como resuelto</button>

@@ -85,21 +85,25 @@ function load(): AppState {
   }
 }
 
-let state: AppState = typeof window === "undefined" ? initial : load();
+let state: AppState = initial;
+let hydrated = false;
 const listeners = new Set<() => void>();
 
-function save() {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(KEY, JSON.stringify(state));
-  }
-}
-
-if (typeof window !== "undefined") {
+function ensureHydrated() {
+  if (hydrated || typeof window === "undefined") return;
+  hydrated = true;
+  state = load();
   window.addEventListener("storage", (e) => {
     if (e.key === KEY && e.newValue) {
       try { state = JSON.parse(e.newValue); listeners.forEach((l) => l()); } catch {}
     }
   });
+}
+
+function save() {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(KEY, JSON.stringify(state));
+  }
 }
 
 export const store = {
@@ -151,11 +155,14 @@ export function updateConversation(id: string, patch: Partial<Conversation>) {
   });
 }
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 export function useStore<T>(selector: (s: AppState) => T): T {
+  const [, setReady] = useState(false);
+  useEffect(() => { ensureHydrated(); setReady(true); }, []);
   return useSyncExternalStore(
     (cb) => store.subscribe(cb),
-    () => selector(store.getState()),
+    () => selector(state),
     () => selector(initial),
   );
 }
+

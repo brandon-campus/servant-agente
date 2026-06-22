@@ -720,13 +720,6 @@ a { color: inherit; text-decoration: none; }
 .bubble-sm .author { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--servant-yellow); margin-bottom: 3px; letter-spacing: 0.5px; }
 .bubble-sm.me .author { color: var(--servant-bg); opacity: 0.7; }
 
-.mobile-warn {
-  display: none;
-  padding: 40px 24px;
-  text-align: center;
-  color: var(--servant-text-dim);
-}
-
 .avatar-sm {
   width: 20px;
   height: 20px;
@@ -770,8 +763,52 @@ a { color: inherit; text-decoration: none; }
 }
 
 @media (max-width: 767px) {
-  .admin-shell { display: none; }
-  .mobile-warn { display: block; }
+  .admin-shell {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .sidebar {
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 8px 12px;
+    border-right: none;
+    border-top: 1px solid var(--servant-panel-border);
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+  }
+  .sidebar-logo { display: none; }
+  .nav-item {
+    flex-direction: column;
+    padding: 6px;
+    gap: 4px;
+    font-size: 10px;
+    background: transparent !important;
+    text-align: center;
+    border-radius: 8px;
+  }
+  .nav-item span:first-child { font-size: 20px; }
+  .nav-item .badge { position: absolute; top: -2px; right: 10px; }
+  .admin-main { flex: 1; overflow-x: hidden; }
+  .admin-header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
+  .admin-content { padding: 20px; }
+  .metric-grid { grid-template-columns: 1fr; }
+  
+  /* Chat Split Mobile */
+  .chat-split {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  .convo-list {
+    height: 250px;
+    border-bottom: 1px solid var(--servant-panel-border);
+    border-radius: 12px 12px 0 0;
+  }
+  .chat-pane {
+    height: 500px;
+    border-radius: 0 0 12px 12px;
+  }
 }
 
 @media (max-width: 1100px) {

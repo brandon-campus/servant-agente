@@ -17,7 +17,6 @@ function AdminPage() {
   const [logged, setLogged] = useState(false);
   return (
     <>
-      <div className="mobile-warn">El dashboard de administración está optimizado para escritorio (mínimo 768px).</div>
       {logged ? <Dashboard onLogout={() => setLogged(false)} /> : <Login onLogin={() => setLogged(true)} />}
     </>
   );
